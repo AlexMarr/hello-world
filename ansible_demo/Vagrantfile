@@ -10,7 +10,22 @@ config.vm.define "ansible" do |ansible|
   ansible.vm.hostname = "ansible"
   ansible.vm.provision "shell", inline: <<-SHELL
     sudo apt-get update
-     sudo apt-get install -y ansible
+    sudo apt-get install -y ansible
+     echo 'Generating key pair'
+     ssh-keygen -f '/home/vagrant/.ssh/id_rsa' -N ''
+     echo 'Copy the contents of public key shown in next line from ansible box to webserver box(es), for example by copying contents to clipboard, then doing echo 'whole contents of public key' > /root/.ssh/authorized_keys on the webserver'
+     cat /home/vagrant/.ssh/id_rsa.pub
+     echo '[webservers]' > hosts
+     echo '192.168.1.253' >> hosts
+     less hosts
+     ssh-agent bash
+     eval `ssh-agent -s`
+     ssh-add /home/vagrant/.ssh/id_rsa
+     echo 'Now go and add public key to webserver box as per above instructions'
+     echo 'Installing ansible'
+#     echo 'Attempting to reach configured hosts'
+#     ansible -i /home/vagrant/hosts -u root -m ping all
+#     ansible-playbook -i /home/vagrant/hosts -u root /vagrant/nginx.yml
    SHELL
   end
 end
