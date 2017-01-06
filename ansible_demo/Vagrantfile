@@ -1,31 +1,49 @@
 Vagrant.configure(2) do |config|
-  config.vm.define "webserver" do |webserver|
-    webserver.vm.box = "ubuntu/trusty64"
-    webserver.vm.network "private_network", ip: "192.168.1.253"
-    webserver.vm.hostname = "webserver"
-  end
 config.vm.define "ansible" do |ansible|
   ansible.vm.box = "ubuntu/trusty64"
   ansible.vm.network "private_network", ip: "192.168.1.254"
   ansible.vm.hostname = "ansible"
-  ansible.vm.provision "shell", inline: <<-SHELL
-    sudo apt-get update
-    sudo apt-get install -y ansible
+  ansible.vm.provision "shell", privileged: false, inline: <<-SHELL
      echo 'Generating key pair'
      ssh-keygen -f '/home/vagrant/.ssh/id_rsa' -N ''
      echo 'Copy the contents of public key shown in next line from ansible box to webserver box(es), for example by copying contents to clipboard, then doing echo 'whole contents of public key' > /root/.ssh/authorized_keys on the webserver'
      cat /home/vagrant/.ssh/id_rsa.pub
+     echo 'Copying the public key to the shared /vagrant directory, where it can also be picked up by webserver boxes'
+     cp /home/vagrant/.ssh/id_rsa.pub /vagrant/id_rsa.pub
+     echo 'Creating hosts file for ansible in /home/vagrant directory'
      echo '[webservers]' > hosts
      echo '192.168.1.253' >> hosts
      less hosts
-     ssh-agent bash
-     eval `ssh-agent -s`
-     ssh-add /home/vagrant/.ssh/id_rsa
-     echo 'Now go and add public key to webserver box as per above instructions'
+#     ssh-agent bash
+#     eval `ssh-agent -s`
+#     ssh-add /home/vagrant/.ssh/id_rsa
+#     echo 'Copying public key to webserver'
+#     scp /home/vagrant/.ssh/id_rsa.pub vagrant@192.168.1.253:id_rsa.pub
+#     ssh vagrant@192.168.1.253 'sudo mv /home/vagrant/id_rsa.pub /root/.ssh/authorized_keys'
+#     ssh vagrant@192.168.1.253 'sudo chown root:root /root/.ssh/authorized_keys'
      echo 'Installing ansible'
+     sudo apt-get update
+     sudo apt-get install -y ansible
+     echo 'Installing python pip'
+     sudo apt-get update && sudo apt-get install python-pip -y
+     echo 'Installing boto library and aws client'
+     sudo pip install boto awscli
 #     echo 'Attempting to reach configured hosts'
 #     ansible -i /home/vagrant/hosts -u root -m ping all
 #     ansible-playbook -i /home/vagrant/hosts -u root /vagrant/nginx.yml
    SHELL
   end
+  config.vm.define "webserver" do |webserver|
+    webserver.vm.box = "ubuntu/trusty64"
+    webserver.vm.network "private_network", ip: "192.168.1.253"
+    webserver.vm.hostname = "webserver"
+#    webserver.vm.provision "shell", privileged: true, inline: <<-SHELL
+#      echo 'Copying public key from shared /vagrant/ directory to /root/.ssh/authorized_keys'
+#      cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
+#      chown root:root /root/.ssh/authorized_keys
+#    SHELL
+    webserver.vm.provision "ansible" do |ansible|
+    ansible.playbook = "nginx.yml"
+  end
+end
 end
