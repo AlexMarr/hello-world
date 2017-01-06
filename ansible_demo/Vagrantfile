@@ -18,6 +18,8 @@ config.vm.define "ansible" do |ansible|
 #     eval `ssh-agent -s`
 #     ssh-add /home/vagrant/.ssh/id_rsa
 #     echo 'Copying public key to webserver'
+#
+#
 #     scp /home/vagrant/.ssh/id_rsa.pub vagrant@192.168.1.253:id_rsa.pub
 #     ssh vagrant@192.168.1.253 'sudo mv /home/vagrant/id_rsa.pub /root/.ssh/authorized_keys'
 #     ssh vagrant@192.168.1.253 'sudo chown root:root /root/.ssh/authorized_keys'
@@ -27,8 +29,7 @@ config.vm.define "ansible" do |ansible|
      echo 'Installing python pip'
      sudo apt-get update && sudo apt-get install python-pip -y
      echo 'Installing boto library and aws client'
-     sudo pip install boto awscli
-#     echo 'Attempting to reach configured hosts'
+     sudo pip install boto awscli#     echo 'Attempting to reach configured hosts'
 #     ansible -i /home/vagrant/hosts -u root -m ping all
 #     ansible-playbook -i /home/vagrant/hosts -u root /vagrant/nginx.yml
    SHELL
