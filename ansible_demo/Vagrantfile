@@ -28,6 +28,7 @@ config.vm.define "ansible" do |ansible|
      sudo apt-get update && sudo apt-get install python-pip -y
      echo 'Installing boto library and aws client'
      sudo pip install boto awscli
+     #
 #     echo 'Attempting to reach configured hosts'
 #     ansible -i /home/vagrant/hosts -u root -m ping all
 #     ansible-playbook -i /home/vagrant/hosts -u root /vagrant/nginx.yml
