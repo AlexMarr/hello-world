@@ -16,6 +16,7 @@ config.vm.define "ansible" do |ansible|
      less hosts
 #     ssh-agent bash
 #     eval `ssh-agent -s`
+#
 #     ssh-add /home/vagrant/.ssh/id_rsa
 #     echo 'Copying public key to webserver'
 #     scp /home/vagrant/.ssh/id_rsa.pub vagrant@192.168.1.253:id_rsa.pub
