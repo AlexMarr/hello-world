@@ -14,11 +14,11 @@ config.vm.define "ansible" do |ansible|
      echo '[webservers]' > hosts
      echo '192.168.1.253' >> hosts
      less hosts
-#     ssh-agent bash
-#     eval `ssh-agent -s`
-#     ssh-add /home/vagrant/.ssh/id_rsa
+     echo 'Adding the private key to ssh-agent'
+     ssh-agent bash
+     eval `ssh-agent -s`
+     ssh-add /home/vagrant/.ssh/id_rsa
 #     echo 'Copying public key to webserver'
-#
 #     scp /home/vagrant/.ssh/id_rsa.pub vagrant@192.168.1.253:id_rsa.pub
 #     ssh vagrant@192.168.1.253 'sudo mv /home/vagrant/id_rsa.pub /root/.ssh/authorized_keys'
 #     ssh vagrant@192.168.1.253 'sudo chown root:root /root/.ssh/authorized_keys'
@@ -37,11 +37,11 @@ config.vm.define "ansible" do |ansible|
     webserver.vm.box = "ubuntu/trusty64"
     webserver.vm.network "private_network", ip: "192.168.1.253"
     webserver.vm.hostname = "webserver"
-#    webserver.vm.provision "shell", privileged: true, inline: <<-SHELL
-#      echo 'Copying public key from shared /vagrant/ directory to /root/.ssh/authorized_keys'
-#      cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
-#      chown root:root /root/.ssh/authorized_keys
-#    SHELL
+    webserver.vm.provision "shell", privileged: true, inline: <<-SHELL
+      echo 'Copying public key from shared /vagrant/ directory to /root/.ssh/authorized_keys'
+      cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
+      chown root:root /root/.ssh/authorized_keys
+    SHELL
     webserver.vm.provision "ansible" do |ansible|
     ansible.playbook = "nginx.yml"
   end
