@@ -4,12 +4,12 @@ config.vm.define "ansible" do |ansible|
   ansible.vm.network "private_network", ip: "192.168.1.254"
   ansible.vm.hostname = "ansible"
   ansible.vm.provision "shell", privileged: false, inline: <<-SHELL
-     echo 'Generating key pair'
-     ssh-keygen -f '/home/vagrant/.ssh/id_rsa' -N ''
-     echo 'Copy the contents of public key shown in next line from ansible box to webserver box(es), for example by copying contents to clipboard, then doing echo 'whole contents of public key' > /root/.ssh/authorized_keys on the webserver'
-     cat /home/vagrant/.ssh/id_rsa.pub
-     echo 'Copying the public key to the shared /vagrant directory, where it can also be picked up by webserver boxes'
-     cp /home/vagrant/.ssh/id_rsa.pub /vagrant/id_rsa.pub
+     #echo 'Generating key pair'
+     #ssh-keygen -f '/home/vagrant/.ssh/id_rsa' -N ''
+     #echo 'Copy the contents of public key shown in next line from ansible box to webserver box(es), for example by copying contents to clipboard, then doing echo 'whole contents of public key' > /root/.ssh/authorized_keys on the webserver'
+     #cat /home/vagrant/.ssh/id_rsa.pub
+     #echo 'Copying the public key to the shared /vagrant directory, where it can also be picked up by webserver boxes'
+     #cp /home/vagrant/.ssh/id_rsa.pub /vagrant/id_rsa.pub
      echo 'Creating hosts file for ansible in /home/vagrant directory'
      echo '[webservers]' > hosts
      echo '192.168.1.253' >> hosts
@@ -28,7 +28,12 @@ config.vm.define "ansible" do |ansible|
      echo 'Installing python pip'
      sudo apt-get update && sudo apt-get install python-pip -y
      echo 'Installing boto library and aws client'
-     sudo pip install boto awscli#     echo 'Attempting to reach configured hosts'
+     sudo pip install boto awscli
+#     echo 'Configure credentials in ~/.aws/credentials'
+
+#     echo 'Import ssh keypair for Amazon AWS'
+#     aws ec2 import-key-pair --key-name ansible --public-key-material file://~/.ssh/id_rsa.pub
+#     echo 'Attempting to reach configured hosts'
 #     ansible -i /home/vagrant/hosts -u root -m ping all
 #     ansible-playbook -i /home/vagrant/hosts -u root /vagrant/nginx.yml
    SHELL
@@ -37,11 +42,14 @@ config.vm.define "ansible" do |ansible|
     webserver.vm.box = "ubuntu/trusty64"
     webserver.vm.network "private_network", ip: "192.168.1.253"
     webserver.vm.hostname = "webserver"
-    webserver.vm.provision "shell", privileged: true, inline: <<-SHELL
-      echo 'Copying public key from shared /vagrant/ directory to /root/.ssh/authorized_keys'
-      cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
-      chown root:root /root/.ssh/authorized_keys
-    SHELL
+#    webserver.vm.provision "shell", privileged: true, inline: <<-SHELL
+#      echo 'Copying public key from shared /vagrant/ directory to /root/.ssh/authorized_keys'
+#      cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
+#      chown root:root /root/.ssh/authorized_keys
+#       echo 'Installing ansible'
+#           sudo apt-get update
+#           sudo apt-get install -y ansible
+#    SHELL
     webserver.vm.provision "ansible" do |ansible|
     ansible.playbook = "nginx.yml"
   end
